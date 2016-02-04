@@ -1,0 +1,24 @@
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"runtime"
+	"time"
+)
+
+func printRand(idx int) {
+	int := rand.Int()
+	fmt.Println(idx, int)
+}
+
+func main() {
+	runtime.GOMAXPROCS(8)
+	count := 2000000
+	for idx := 0; idx < count; idx++ {
+		go printRand(idx)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
+// go run goro.go
