@@ -32,6 +32,9 @@ Here's a more complex vanity address, this will take a significally longer time 
 
 The more chars you add, the longer the time will be, exponentially!
 
+**Note: you have to supply hexadecimal characters only, so from `0` to `9` and from `A` to `F`, there's no check at the moment for wrong input.**
+
+
 ### More efficient run:
 
 Compile and run:

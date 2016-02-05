@@ -35,6 +35,7 @@ func addrGen(toMatch string) {
 // tries to match the address with the string provided by the user, exits if successful
 //
 func addrMatch(addrStr string, toMatch string, key *ecdsa.PrivateKey) {
+	toMatch = strings.ToLower(toMatch)
 	addrStrMatch := strings.TrimPrefix(addrStr, toMatch)
 	found := addrStrMatch != addrStr
 	if found {
@@ -56,6 +57,7 @@ func main() {
 		os.Exit(1)
 	} else {
 		toMatch = os.Args[1]
+		// errWrongMatch(toMatch)
 	}
 
 	for true {
@@ -78,3 +80,10 @@ func errNoArg() {
 	println("\nexample: go run vanieth.go 42")
 	println("\nexiting...")
 }
+
+// func errWrongMatch(match string) {
+// 	strings.ContainsAny(match, "")
+// 	if (wrongMatch) {
+// 		println("You need to pass a findable address")
+// 	}
+// }
