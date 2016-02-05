@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum/crypto" // you need to `go get` this, as is not in the stdlib
 )
@@ -59,7 +60,7 @@ func main() {
 
 	for true {
 		go addrGen(toMatch)
-		// time.Sleep(1 * time.Millisecond)
+		time.Sleep(1 * time.Millisecond)
 	}
 }
 
