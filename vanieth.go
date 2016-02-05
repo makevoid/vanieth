@@ -21,8 +21,8 @@ func genAddr(match string) {
 		// fmt.Println("pub:", key.PublicKey)
 		keyStr := hex.EncodeToString(crypto.FromECDSA(key))
 		println("Address found:")
-		fmt.Println("addr:", addrStr)
-		fmt.Println("pvt:", keyStr)
+		fmt.Printf("addr: 0x%s\n", addrStr)
+		fmt.Printf("pvt: 0x%s\n", keyStr)
 		println("\nexiting...")
 		os.Exit(0)
 	}
