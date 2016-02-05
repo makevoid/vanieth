@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
+	"os"
 	"runtime"
 	"strings"
 	"time"
@@ -19,28 +20,39 @@ func genAddr(match string) {
 	if found {
 		// fmt.Println("pub:", key.PublicKey)
 		keyStr := hex.EncodeToString(crypto.FromECDSA(key))
-		fmt.Println("pvt:", keyStr)
+		println("Address found:")
 		fmt.Println("addr:", addrStr)
-		println("")
+		fmt.Println("pvt:", keyStr)
+		println("\nexiting...")
+		os.Exit(0)
 	}
 }
 
 func main() {
 	runtime.GOMAXPROCS(8)
 
-	toMatch := "123"
-
-	count := 10000
-	for ixx := 0; ixx < count; ixx++ {
-		go genAddr(toMatch)
+	var toMatch string
+	if len(os.Args) == 1 {
+		println("You need to pass a vanity match, retry with an extra agrument like: 42")
+		println("\nexample: go run vanieth.go 42")
+		println("\nexiting...")
+		os.Exit(1)
+	} else {
+		toMatch = os.Args[1]
 	}
 
-	time.Sleep(20000 * time.Millisecond)
-	// crypto.PubkeyToAddress(pubKey)
+	for true {
+		go genAddr(toMatch)
+		time.Sleep(1 * time.Millisecond)
+	}
 }
 
+// Example run:
 //
-// pvt: 3bfd853e59b6d38cb125fb027dc0e4d9354729c6954e0d933de11f4c2e63e012
-// addr: abc5e63e9d1165c592c7f47847a60d38f93bc4bf
-
+// $ go run vanieth.go 1234
+//
+// Address found:
+// addr: 123411cc4a2e2e3238ee8e22d0d7b3cf2c8add9c
+// pvt: 208439bf49edbc236bcffaa831e32006b91e6251150992fe5e704a3c3870415d
+//
 // https://github.com/ethereum/go-ethereum
