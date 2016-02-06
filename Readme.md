@@ -6,11 +6,15 @@ A simple Ethereum vanity address "generator" written in golang.
 
 You have to have go (golang) installed
 
-Then download this repo into your GOPATH, cd into it and run:
+Go get this repo:
 
-    go get
+    go get github.com/makevoid/vanieth
 
-to get the repo only dependency (`github.com/ethereum/go-ethereum/crypto`)
+`cd` into it:
+
+    cd $GOPATH/src/github.com/makevoid/vanieth
+
+An then run it!
 
 ### Example run:
 
