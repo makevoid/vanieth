@@ -39,7 +39,7 @@ func addrMatch(addrStr string, toMatch string, key *ecdsa.PrivateKey) {
 	addrStrMatch := strings.TrimPrefix(addrStr, toMatch)
 	found := addrStrMatch != addrStr
 	if found {
-		// fmt.Println("pub:", key.PublicKey) // uncomment if you want the public key
+		// fmt.Println("pub:", hex.EncodeToString(crypto.FromECDSAPub(&key.PublicKey))) // uncomment if you want the public key
 		keyStr := hex.EncodeToString(crypto.FromECDSA(key))
 		addrFound(addrStr, keyStr)
 		os.Exit(0) // here the program exits when it found a match
