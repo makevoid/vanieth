@@ -57,12 +57,11 @@ func main() {
 		os.Exit(1)
 	} else {
 		toMatch = os.Args[1]
-		// errWrongMatch(toMatch)
 	}
 
 	for true {
 		go addrGen(toMatch)
-		time.Sleep(1 * time.Millisecond)
+		time.Sleep(1 * time.Microsecond)
 	}
 }
 
@@ -80,10 +79,3 @@ func errNoArg() {
 	println("\nexample: go run vanieth.go 42")
 	println("\nexiting...")
 }
-
-// func errWrongMatch(match string) {
-// 	strings.ContainsAny(match, "")
-// 	if (wrongMatch) {
-// 		println("You need to pass a findable address")
-// 	}
-// }
