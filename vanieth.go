@@ -164,15 +164,16 @@ func main() {
 		println("     Will list the details and first five contract address for the supplied private key.")
 		println()
 	}
-	flag.BoolVarP(&mainAddress, "address", "a", false, "Search in the main address")
-	flag.BoolVarP(&contractAddress, "contract", "c", false, "Search through first `distance` contract addresses (or 10 if unspecified)")
-	flag.IntVarP(&contractDistance, "distance", "d", 0, "Specify distance into contract to search")
-	flag.BoolVarP(&allAddresses, "list", "l", false, "List all `distance` contract addresses with result")
-	flag.BoolVarP(&noChecksum, "no-sum", "s", false, "Don't convert to checksum address")
+
+	flag.BoolVarP(&mainAddress, "address", "a", false, "Search for results in the main address (can specify with -c to search both at once)")
+	flag.BoolVarP(&contractAddress, "contract", "c", false, "Search through first \"distance\" number of contract addresses (or 10 if unspecified)")
+	flag.BoolVarP(&allAddresses, "list", "l", false, "List all contract addresses within given \"distance\" number along with output")
+	flag.BoolVarP(&noChecksum, "no-sum", "s", false, "Don't convert the address to a checksum address")
 	flag.BoolVarP(&ignoreCase, "ignore-case", "i", false, "Search in case-insensitive fashion")
 	flag.BoolVarP(&quietMode, "quiet", "q", false, "Don't print out speed progress updates, just the found addresses (forced if not TTY)")
-	flag.IntVarP(&totalCount, "count", "n", 1, "How many results to find")
-	flag.StringVarP(&privateKey, "private", "p", "", "Specify a single private key to display")
+	flag.IntVarP(&contractDistance, "distance", "d", 0, "Specify `depth` of contract addresses to search (only if -c or -l specified)")
+	flag.IntVarP(&totalCount, "count", "n", 1, "Keep searching until this many `results` have been found")
+	flag.StringVarP(&privateKey, "private", "p", "", "Specify a single private `key` to display")
 	flag.Parse(os.Args[1:])
 
 	if !mainAddress && !contractAddress {

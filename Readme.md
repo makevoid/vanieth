@@ -45,20 +45,20 @@ Usage:
   vanieth [-acilqs] [-n num] [-d dist] (-p key | search)
 
   -a, --address
-    	Search in the main address
-  -c, --contract distance
-    	Search through first distance contract addresses (or 10 if unspecified)
-  -n, --count int
-    	How many results to find (default 1)
-  -d, --distance int
-    	Specify distance into contract to search
+    	Search for results in the main address (can specify with -c to search both at once)
+  -c, --contract
+    	Search through first "distance" number of contract addresses (or 10 if unspecified)
+  -n, --count results
+    	Keep searching until this many results have been found (default 1)
+  -d, --distance depth
+    	Specify depth of contract addresses to search (only if -c or -l specified)
   -i, --ignore-case
     	Search in case-insensitive fashion
-  -l, --list distance
-    	List all distance contract addresses with result
+  -l, --list
+    	List all contract addresses within given "distance" number along with output
   -s, --no-sum
-    	Don't convert to checksum address
-  -p, --private string
+    	Don't convert the address to a checksum address
+  -p, --private key
     	Specify a single private key to display
   -q, --quiet
     	Don't print out speed progress updates, just the found addresses (forced if not TTY)
