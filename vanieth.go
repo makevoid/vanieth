@@ -11,10 +11,12 @@ import (
 	"strings"
 	"sync"
 	"time"
+
 	"golang.org/x/crypto/ssh/terminal"
-	"./lib"
+
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/makevoid/vanieth/lib"
 	"github.com/ogier/pflag"
 )
 
@@ -129,7 +131,7 @@ func main() {
 
 	flag := pflag.NewFlagSet("vanieth", pflag.ExitOnError)
 
-	flag.Usage = func () {
+	flag.Usage = func() {
 		println("Usage:")
 		println("  vanieth [-acilqs] [-n num] [-d dist] (-p key | search)")
 		println()

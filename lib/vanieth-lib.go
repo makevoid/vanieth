@@ -1,9 +1,10 @@
 package lib
 
 import (
-  "strconv"
+	"strconv"
 )
 
+// FormatRate will output the number as a fixed string with commas.
 func FormatRate(n int64) string {
 	in := strconv.FormatInt(n, 10)
 	out := make([]byte, len(in)+(len(in)-2+int(in[0]/'0'))/3)
@@ -23,6 +24,7 @@ func FormatRate(n int64) string {
 	}
 }
 
+// PrintUsageExamples will print out the various usage examples.
 func PrintUsageExamples() {
 	println("Examples:")
 	println()
