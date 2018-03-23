@@ -26,10 +26,9 @@ func checksumAddr(addr string) string {
 	a := []byte(addr)
 	hash := hex.EncodeToString(crypto.Keccak256(a))
 	for i := 0; i < len(a); i++ {
-		c := a[i]
-		if c >= 'a' {
+		if a[i] >= 'a' {
 			if hash[i] >= '8' {
-				a[i] = c - 0x20
+				a[i] -= 0x20
 			}
 		}
 	}
