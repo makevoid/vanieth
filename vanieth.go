@@ -178,7 +178,7 @@ func main() {
 
 		f := <-foundChan
 		j, _ := json.Marshal(f)
-		fmt.Printf("%s\n", string(j))
+		println(string(j))
 		return
 	}
 
@@ -186,7 +186,7 @@ func main() {
 
 	args := flag.Args()
 	if len(args) != 1 {
-		println("Cannot search, no search string provided", flag.Args())
+		println("Cannot search, no search string provided")
 		println()
 		flag.Usage()
 		os.Exit(1)
@@ -215,7 +215,7 @@ func main() {
 				foundCount++
 				j, _ := json.Marshal(f)
 				if quietMode {
-					fmt.Printf("%s\n", string(j))
+					println(string(j))
 				} else {
 					fmt.Printf("\r%s\n", string(j))
 				}
