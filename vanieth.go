@@ -1,132 +1,38 @@
 package main
 
 import (
-	"crypto/ecdsa"
-	"encoding/hex"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
-	"regexp"
 	"runtime"
-	"strings"
-	"sync"
 	"time"
 
 	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
+	"regexp"
+	"strings"
+
 	"github.com/makevoid/vanieth/lib"
 	"github.com/ogier/pflag"
 )
 
-var mu sync.Mutex
-
-func checksumAddr(addr string) string {
-	a := []byte(addr)
-	hash := hex.EncodeToString(crypto.Keccak256(a))
-	for i := 0; i < len(a); i++ {
-		if a[i] >= 'a' {
-			if hash[i] >= '8' {
-				a[i] -= 0x20
-			}
-		}
-	}
-	return string(a)
-}
-
-func contractGen(addr []byte, pos int) string {
-	b, _ := rlp.EncodeToBytes([]interface{}{addr, uint(pos)})
-	e := crypto.Keccak256(b)
-	return hex.EncodeToString(e[12:])
-}
-
-// generates a public key,  address
-func addrGen(toMatch *regexp.Regexp) {
-	key, _ := crypto.GenerateKey()
-	addr := crypto.PubkeyToAddress(key.PublicKey)
-	addrStr := hex.EncodeToString(addr[:])
-	addrMatch(addrStr, toMatch, key)
-}
-
-// tries to match the address with the string provided by the user, exits if successful
-func addrMatch(addrStr string, toMatch *regexp.Regexp, key *ecdsa.PrivateKey) {
-	var found bool
-
-	f := map[string]interface{}{}
-
-	if contractAddress || allAddresses {
-		var contracts []string
-		addr, _ := hex.DecodeString(addrStr)
-		for i := 0; i < contractDistance; i++ {
-			searchAddr := contractGen(addr, i)
-			sumAddr := searchAddr
-			if !noChecksum {
-				sumAddr = checksumAddr(searchAddr)
-				if !ignoreCase {
-					searchAddr = sumAddr
-				}
-			}
-			searchCount++
-			if allAddresses {
-				contracts = append(contracts, "0x"+sumAddr)
-			}
-
-			if contractAddress && !found && toMatch != nil && toMatch.MatchString(searchAddr) {
-				found = true
-			}
-			if found && !allAddresses {
-				f[fmt.Sprintf("contract-%d", i+1)] = "0x" + sumAddr
-				break
-			}
-		}
-		if allAddresses {
-			f["contracts"] = contracts
-		}
-	}
-
-	if mainAddress {
-		searchAddr := addrStr
-		if !noChecksum {
-			addrStr = checksumAddr(addrStr)
-			if !ignoreCase {
-				searchAddr = addrStr
-			}
-		}
-		if !found && toMatch != nil && toMatch.MatchString(searchAddr) {
-			found = true
-		}
-		searchCount++
-	}
-
-	if found || toMatch == nil {
-		mu.Lock()
-		defer mu.Unlock()
-
-		f["address"] = "0x" + addrStr
-		f["public"] = hex.EncodeToString(crypto.FromECDSAPub(&key.PublicKey))
-		f["private"] = hex.EncodeToString(crypto.FromECDSA(key))
-
-		foundChan <- f
-		return
-	}
-}
-
-var (
-	foundChan = make(chan map[string]interface{}, 10000)
-
-	searchCount                  int64
-	foundCount, totalCount       int
-	contractDistance             int
-	mainAddress, contractAddress bool
-	noChecksum, allAddresses     bool
-	ignoreCase, quietMode        bool
-	privateKey                   string
-)
-
 // main, executes addrGen ad-infinitum, until the required matches are found
 func main() {
-	runtime.GOMAXPROCS(8)
+	var (
+		runSeconds    int64
+		maxProcesses  int
+		foundCount    int
+		findCount     int
+		quietMode     bool
+		privateKey    string
+		sourceAddress string
+	)
+
+	results := make(chan *lib.Match, 10000)
+	matcher := &lib.Matcher{
+		Results: results,
+	}
 
 	flag := pflag.NewFlagSet("vanieth", pflag.ExitOnError)
 
@@ -139,96 +45,158 @@ func main() {
 		lib.PrintUsageExamples()
 	}
 
-	flag.BoolVarP(&mainAddress, "address", "a", false, "Search for results in the main address (can specify with -c to search both at once)")
-	flag.BoolVarP(&contractAddress, "contract", "c", false, "Search through first \"distance\" number of contract addresses (or 10 if unspecified)")
-	flag.BoolVarP(&allAddresses, "list", "l", false, "List all contract addresses within given \"distance\" number along with output")
-	flag.BoolVarP(&noChecksum, "no-sum", "s", false, "Don't convert the address to a checksum address")
-	flag.BoolVarP(&ignoreCase, "ignore-case", "i", false, "Search in case-insensitive fashion")
+	flag.BoolVarP(&matcher.FindInMain, "address", "a", false, "Search for results in the main address (can specify with -c to search both at once)")
+	flag.BoolVarP(&matcher.FindInContract, "contract", "c", false, "Search through first \"distance\" number of contract addresses (or 10 if unspecified)")
+	flag.BoolVarP(&matcher.ShowContractAddresses, "list", "l", false, "List all contract addresses within given \"distance\" number along with output")
+	flag.BoolVarP(&matcher.DoNotChecksum, "no-sum", "s", false, "Don't convert the address to a checksum address")
+	flag.BoolVarP(&matcher.IgnoreCase, "ignore-case", "i", false, "Search in case-insensitive fashion")
 	flag.BoolVarP(&quietMode, "quiet", "q", false, "Don't print out speed progress updates, just the found addresses (forced if not TTY)")
-	flag.IntVarP(&contractDistance, "distance", "d", 0, "Specify `depth` of contract addresses to search (only if -c or -l specified)")
-	flag.IntVarP(&totalCount, "count", "n", 1, "Keep searching until this many `results` have been found")
-	flag.StringVarP(&privateKey, "private", "p", "", "Specify a single private `key` to display")
+	flag.IntVarP(&matcher.ContractDepth, "distance", "d", 0, "Specify `depth` of contract addresses to search (only if -c or -l specified)")
+	flag.IntVarP(&findCount, "count", "n", 0, "Keep searching until this many `results` have been found")
+	flag.IntVarP(&maxProcesses, "max-procs", "", 0, "Set number of simultaneous processes (default = numCPUs)")
+	flag.Int64VarP(&runSeconds, "timed", "t", 0, "Allow to run for given number of `seconds`")
+	flag.StringVarP(&privateKey, "key", "", "", "Specify a single private `key` to display")
+	flag.StringVarP(&sourceAddress, "scan", "", "", "Scan a specified source address (only useful for searching contract addresses)")
 	flag.Parse(os.Args[1:])
 
-	if !mainAddress && !contractAddress {
-		mainAddress = true
+	if !matcher.FindInMain && !matcher.FindInContract {
+		matcher.FindInMain = true
 	}
 
-	if contractAddress && contractDistance == 0 {
-		contractDistance = 10
+	if matcher.FindInContract && matcher.ContractDepth == 0 {
+		matcher.ContractDepth = 10
 	}
 
 	if !terminal.IsTerminal(int(os.Stdout.Fd())) {
 		quietMode = true
 	}
 
-	if privateKey != "" {
-		keyBytes, err := hex.DecodeString(privateKey)
-		if err != nil {
-			println("Cannot convert private key from hex")
-		}
-		key, err := crypto.ToECDSA(keyBytes)
-		if err != nil {
-			println("Cannot parse private key", err)
-		}
-
-		addr := crypto.PubkeyToAddress(key.PublicKey)
-		addrStr := hex.EncodeToString(addr[:])
-
-		addrMatch(addrStr, nil, key)
-
-		f := <-foundChan
-		j, _ := json.Marshal(f)
-		println(string(j))
-		return
+	if maxProcesses == 0 {
+		maxProcesses = runtime.NumCPU()
 	}
 
-	var match string
-
 	args := flag.Args()
-	if len(args) != 1 {
+	if len(args) < 1 && privateKey == "" && sourceAddress == "" {
 		println("Cannot search, no search string provided")
 		println()
 		flag.Usage()
 		os.Exit(1)
+	} else if len(args) > 0 {
+		matchArg := args[0]
+
+		// Strip off the 0x
+		matchArg = strings.TrimPrefix(matchArg, "0x")
+
+		if matcher.IgnoreCase {
+			matchArg = strings.ToLower(matchArg)
+		}
+
+		if isPlain, _ := regexp.MatchString(`^[0-9a-fA-F]$`, matchArg); isPlain {
+			// This is a plain prefix matchArg, we don't need a regular expression
+			matcher.Prefix = "0x" + matchArg
+		} else {
+			matcher.Regex = regexp.MustCompile("^0x" + matchArg)
+		}
+	}
+
+	if privateKey != "" {
+		account, err := lib.PrivateKeyAccount(privateKey)
+		if err != nil {
+			println("Error creating account from private key", err)
+			os.Exit(1)
+		}
+		match := matcher.Match(account)
+		j, _ := json.Marshal(match)
+		println(string(j))
+		return
+	}
+
+	if sourceAddress != "" {
+		account, err := lib.AddressAccount(sourceAddress)
+		if err != nil {
+			println("Error creating account from address", err)
+			os.Exit(1)
+		}
+		matcher.FindInContract = true // Only makes sense for searching contract addresses
+		if matcher.ContractDepth == 0 {
+			matcher.ContractDepth = 10
+		}
+		match := matcher.Match(account)
+		j, _ := json.Marshal(match)
+		println(string(j))
+		return
+	}
+
+	var ctx = context.Background()
+	var cancel context.CancelFunc
+	if runSeconds > 0 {
+		ctx, cancel = context.WithTimeout(ctx, time.Duration(runSeconds)*time.Second)
 	} else {
-		match = args[0]
+		ctx, cancel = context.WithCancel(ctx)
+		if findCount == 0 {
+			// We default to count = 1 if no run time specified
+			findCount = 1
+		}
 	}
-
-	if ignoreCase {
-		match = strings.ToLower(match)
-	}
-
-	toMatch := regexp.MustCompile("^" + match)
 
 	go func() {
 		tock := time.NewTicker(time.Second)
 		if quietMode {
 			tock.Stop()
 		}
+
+		var rated bool
+		defer func() {
+			if rated {
+				// Don't leave the new-line hanging
+				println()
+			}
+		}()
+
 		for {
 			select {
+			case <-ctx.Done():
+				return
+
 			case <-tock.C:
-				var n int64
-				n, searchCount = searchCount, 0
-				fmt.Printf("\rRate: %s/sec   \b\b", lib.FormatRate(n))
-			case f := <-foundChan:
+				fmt.Printf("\rRate: %s/sec   \b\b", lib.FormatRate(lib.SearchRate()))
+				rated = true
+
+			case f := <-results:
 				foundCount++
 				j, _ := json.Marshal(f)
 				if quietMode {
 					println(string(j))
 				} else {
 					fmt.Printf("\r%s\n", string(j))
+					rated = false
 				}
-				if foundCount >= totalCount {
-					os.Exit(0)
+
+				if findCount > 0 && foundCount >= findCount {
+					// We have met our requirements, time to leave
+					cancel()
+					return
 				}
 			}
 		}
 	}()
 
+	// Create a semaphore that will count up to maxProcesses
+	semaphore := make(chan bool, maxProcesses)
+
+	// While running
 	for {
-		go addrGen(toMatch)
-		time.Sleep(1 * time.Microsecond)
+		select {
+		case <-ctx.Done():
+			// Not running anymore
+			return
+
+		default:
+			semaphore <- true // Keep going until semaphore fills up
+			if ctx.Err() == nil {
+				// We're not shutting down, so run another
+				matcher.Run(ctx, semaphore)
+			}
+		}
 	}
 }
