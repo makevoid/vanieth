@@ -56,6 +56,6 @@ func PrintUsageExamples() {
 	println("     List the details and first five contract address for the supplied private key.")
 	println()
 	println("  vanieth -l --scan=0x950024ae4d9934c65c9fd04249e0f383910d27f2")
-	println("     Show the first 10 contract addresses of the supplied address")
+	println("     Show the first 10 contract addresses of the supplied address.")
 	println()
 }

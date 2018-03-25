@@ -38,7 +38,7 @@ func main() {
 
 	flag.Usage = func() {
 		println("Usage:")
-		println("  vanieth [-acilqs] [-n num] [-d dist] (-p key | search)")
+		println("  vanieth [-acilqs] [-n num] [-d dist] (-key=key | -scan=address | search)")
 		println()
 		flag.PrintDefaults()
 		println()
@@ -56,7 +56,7 @@ func main() {
 	flag.IntVarP(&maxProcesses, "max-procs", "", 0, "Set number of simultaneous processes (default = numCPUs)")
 	flag.Int64VarP(&runSeconds, "timed", "t", 0, "Allow to run for given number of `seconds`")
 	flag.StringVarP(&privateKey, "key", "", "", "Specify a single private `key` to display")
-	flag.StringVarP(&sourceAddress, "scan", "", "", "Scan a specified source address (only useful for searching contract addresses)")
+	flag.StringVarP(&sourceAddress, "scan", "", "", "Scan a specified source `address` (only useful for searching contract addresses)")
 	flag.Parse(os.Args[1:])
 
 	if !matcher.FindInMain && !matcher.FindInContract {
