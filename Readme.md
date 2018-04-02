@@ -42,62 +42,76 @@ Apart from searching for just prefixes you can also search for contract addresse
 
 ```
 Usage:
-  vanieth [-acilqs] [-n num] [-d dist] (-p key | search)
+  vanieth [-acilqs] [-n num] [-d dist] (-key=key | -scan=address | search)
 
   -a, --address
     	Search for results in the main address (can specify with -c to search both at once)
   -c, --contract
     	Search through first "distance" number of contract addresses (or 10 if unspecified)
   -n, --count results
-    	Keep searching until this many results have been found (default 1)
+    	Keep searching until this many results have been found
   -d, --distance depth
     	Specify depth of contract addresses to search (only if -c or -l specified)
   -i, --ignore-case
     	Search in case-insensitive fashion
+  --key key
+    	Specify a single private key to display
   -l, --list
     	List all contract addresses within given "distance" number along with output
+  --max-procs int
+    	Set number of simultaneous processes (default = numCPUs)
   -s, --no-sum
     	Don't convert the address to a checksum address
-  -p, --private key
-    	Specify a single private key to display
   -q, --quiet
     	Don't print out speed progress updates, just the found addresses (forced if not TTY)
+  --scan string
+    	Scan a specified source address (only useful for searching contract addresses)
+  -t, --timed seconds
+    	Allow to run for given number of seconds
 ```
 
 #### Examples:
 
 ```vanieth -n 3 'ABC'```
 
-Will find 3 addresses that have `ABC` at the beginning.
+Find 3 addresses that have `ABC` at the beginning.
+
+```vanieth -t 5 'ABC'```
+
+Find as many address that have `ABC` at the beginning as possible within 5 seconds.
+
 
 ```vanieth -c 'ABC'```
 
-Will find any address that has `ABC` at the beginning of any of the first 10 contract addresses.
+Find any address that has `ABC` at the beginning of any of the first 10 contract addresses.
 
 ```vanieth -cd1 '00+AB'```
 
-Will find any address that has `AB` after 2 or more `0` chars in the first contract address.
+Find any address that has `AB` after 2 or more `0` chars in the first contract address.
 
 ```vanieth '.*ABC'```
 
-Will find a single address that contains `ABC` anywhere.
+Find a single address that contains `ABC` anywhere.
 
 ```vanieth '.*DEF$'```
 
-Will find a single address that contains `DEF` at the end.
+Find a single address that contains `DEF` at the end.
 
 ```vanieth -i 'A.*A$'```
 
-Will find a single address that contains either `A` or `a` at both the start and end.
+Find a single address that contains either `A` or `a` at both the start and end.
 
 ```vanieth -ld1 '.*ABC'```
 
-Will find a single address that contains `ABC` anywhere, and also list the first contract address.
+Find a single address that contains `ABC` anywhere, and also list the first contract address.
 
-```vanieth -ld5 -p '349fbc254ff918305ae51967acc1e17cfbd1b7c7e84ef8fa670b26f3be6146ba'```
+```vanieth -ld5 --key=0x349fbc254ff918305ae51967acc1e17cfbd1b7c7e84ef8fa670b26f3be6146ba```
 
-Will list the details and first five contract address for the supplied private key.
+List the details and first five contract address for the supplied private key.
 
+```vanieth -l --scan=0x950024ae4d9934c65c9fd04249e0f383910d27f2```
+
+Show the first 10 contract addresses of the supplied address.
 
 Enjoy,
 
