@@ -1,5 +1,7 @@
 # Vanieth
 
+![](https://github.com/makevoid/vanieth/blob/master/screenshots/readme_banner.png?raw=true)
+
 A comprehensive and fast Ethereum vanity address "generator" written in golang.
 
 ### Prerequisites:
