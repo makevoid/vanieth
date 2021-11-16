@@ -95,7 +95,15 @@ func main() {
 			// This is a plain prefix matchArg, we don't need a regular expression
 			matcher.Prefix = "0x" + matchArg
 		} else {
-			matcher.Regex = regexp.MustCompile("^0x" + matchArg)
+			// Could be a regex or an invalid character
+			// check we have characters that are part of a regex
+			if strings.ContainsAny(matchArg, "\\.+*[](){,}-:$^!") {
+				matcher.Regex = regexp.MustCompile("^0x" + matchArg)
+			} else {
+				// we have a character that's not part of an Ethereum address
+				fmt.Printf("Error: %s contains an invalid character for an Ethereum address.", matchArg)
+				os.Exit(-1)
+			}
 		}
 	}
 
