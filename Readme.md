@@ -4,7 +4,14 @@
 
 A comprehensive and fast Ethereum vanity address "generator" written in golang.
 
-### Prerequisites:
+### Docker Run
+
+If you are just interested in running the program I recently added a way to run the CLI app via Docker:
+
+    docker run makevoid/vanieth ./vanieth abc
+
+
+### Golang Run - Prerequisites:
 
 You have to have go (golang) installed
 
@@ -74,46 +81,93 @@ Usage:
 
 #### Examples:
 
-```vanieth -n 3 'ABC'```
+```
+vanieth -n 3 'ABC'
+```
 
 Find 3 addresses that have `ABC` at the beginning.
 
-```vanieth -t 5 'ABC'```
+```
+vanieth -t 5 'ABC'
+```
 
 Find as many address that have `ABC` at the beginning as possible within 5 seconds.
 
 
-```vanieth -c 'ABC'```
+```
+vanieth -c 'ABC'
+```
 
 Find any address that has `ABC` at the beginning of any of the first 10 contract addresses.
 
-```vanieth -cd1 '00+AB'```
+```
+vanieth -cd1 '00+AB'
+```
 
 Find any address that has `AB` after 2 or more `0` chars in the first contract address.
 
-```vanieth '.*ABC'```
+```
+vanieth '.*ABC'
+```
 
 Find a single address that contains `ABC` anywhere.
 
-```vanieth '.*DEF$'```
+```
+vanieth '.*DEF$'
+```
 
 Find a single address that contains `DEF` at the end.
 
-```vanieth -i 'A.*A$'```
+```
+vanieth -i 'A.*A$'
+```
 
 Find a single address that contains either `A` or `a` at both the start and end.
 
-```vanieth -ld1 '.*ABC'```
+```
+vanieth -ld1 '.*ABC'
+```
 
 Find a single address that contains `ABC` anywhere, and also list the first contract address.
 
-```vanieth -ld5 --key=0x349fbc254ff918305ae51967acc1e17cfbd1b7c7e84ef8fa670b26f3be6146ba```
+```
+vanieth -ld5 --key=0x349fbc254ff918305ae51967acc1e17cfbd1b7c7e84ef8fa670b26f3be6146ba
+```
 
 List the details and first five contract address for the supplied private key.
 
-```vanieth -l --scan=0x950024ae4d9934c65c9fd04249e0f383910d27f2```
+```
+vanieth -l --scan=0x950024ae4d9934c65c9fd04249e0f383910d27f2
+```
 
 Show the first 10 contract addresses of the supplied address.
+
+### Go Build
+
+`go get` the project following the instructions at the top
+
+cd into your $GOROOT where this project is located
+
+Build the executable with
+
+    ./build.sh
+
+### Docker Build
+
+Now that you have built the executable you can package it up as a docker container via docker-compose
+
+Just run:
+
+    docker-compose build
+
+this will build the docker container with your changes.
+
+Test run via:
+
+    docker-compose run vanieth ./vanieth abc
+
+---
+
 
 Enjoy,
 

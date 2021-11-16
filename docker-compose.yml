@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  vanieth:
+    image: makevoid/vanieth
+    build:
+      context: .
