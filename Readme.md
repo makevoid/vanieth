@@ -1,6 +1,8 @@
 # Vanieth
 
-<img width="653" height="653" alt="vanieth gopher" src="https://github.com/user-attachments/assets/2501fd0b-4196-4f74-86fe-6f908498a5fe" />
+<div style="margin: 0 auto; width: 100%" align="center">
+  <img width="400" height="400" alt="vanieth gopher" src="https://github.com/user-attachments/assets/2501fd0b-4196-4f74-86fe-6f908498a5fe" />
+</div>
 
 > ⚡ An Ethereum vanity address generator written in Go many years ago by [@makevoid](https://twitter.com/makevoid) with @norganna contributing to it.
 > The project was originally aimed to be didactical and easy to read and it's only `~400` lines of Go.
