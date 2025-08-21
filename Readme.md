@@ -1,174 +1,203 @@
 # Vanieth
 
-![](https://github.com/makevoid/vanieth/blob/master/screenshots/readme_banner.png?raw=true)
+![Vanieth Banner](https://github.com/makevoid/vanieth/blob/master/screenshots/readme_banner.png?raw=true)
 
-A comprehensive and fast Ethereum vanity address "generator" written in golang.
+> ⚡ A high-performance Ethereum vanity address generator written in Go
 
-### Docker Run
+[![Go Version](https://img.shields.io/badge/go-%3E%3D1.17-blue.svg)](https://golang.org/)
+[![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)](https://hub.docker.com/r/makevoid/vanieth)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-If you are just interested in running the program I recently added a way to run the CLI app via Docker:
+**Note:** This is a stable release that works well but is not currently under active development.
 
-    docker run makevoid/vanieth ./vanieth abc
+## 🚀 Quick Start
 
+### Using Docker (Recommended)
 
-### Golang Run - Prerequisites:
-
-You have to have go (golang) installed
-
-Go get this repo:
-
-    go get github.com/makevoid/vanieth
-
-Run it:
-
-    $GOPATH/bin/vanieth
-
-Copy it to your path, or add $GOPATH/bin to your path
-
-### Example run:
-
-```
-$ vanieth 42
-{"address":"0x42f32B004Da1093d51AE40a58F38E33BA4f46397","private":"4774628228852ee570d188f92cd10df3282bb5d895fc701733f43fca6bfb9852","public":"04d811caac49ba458fda498e5bc385bc9cc6e67aa6b19ba754c6cd75953ef06310e8607798ce5810a0b32fbd41fe8915de52fd511e7660038ff7067a0e94fc9481"}
+```bash
+docker run makevoid/vanieth ./vanieth abc
 ```
 
-The returned address and private key are in hex format. As you can see the ethereum address starts with the mythical `42`.
+### Using Go
 
-Here's a more complex vanity address, this will take a significally longer time to do a complete run.
+```bash
+# Install
+go get github.com/makevoid/vanieth
 
-```
-$ vanieth 1234
-{"address":"0x12341b4c716B8FCFA8E13A83CA3dFd2c6051E60D","private":"ee50661eb0080cd36ce380f3dad5511c91f97ccee67bd14dc7a91335a34720d1","public":"04e0526fbc5552e4ff117a5c065ad3ce6f8211e160e12bdd3dded3dab2bfc268916489ed2c8d4af6c624406085c5e9a6946bdfbe0d74de26384a7c9baaf6f2de64"}
-```
+# Run
+$GOPATH/bin/vanieth 42
 
-The more chars you add, the longer the time will be, exponentially!
-
-### Advanced features
-
-Apart from searching for just prefixes you can also search for contract addresses, regular expressions and dump details for an existing or previously found private key:
-
-### Usage
-
-```
-Usage:
-  vanieth [-acilqs] [-n num] [-d dist] (-key=key | -scan=address | search)
-
-  -a, --address
-    	Search for results in the main address (can specify with -c to search both at once)
-  -c, --contract
-    	Search through first "distance" number of contract addresses (or 10 if unspecified)
-  -n, --count results
-    	Keep searching until this many results have been found
-  -d, --distance depth
-    	Specify depth of contract addresses to search (only if -c or -l specified)
-  -i, --ignore-case
-    	Search in case-insensitive fashion
-  --key key
-    	Specify a single private key to display
-  -l, --list
-    	List all contract addresses within given "distance" number along with output
-  --max-procs int
-    	Set number of simultaneous processes (default = numCPUs)
-  -s, --no-sum
-    	Don't convert the address to a checksum address
-  -q, --quiet
-    	Don't print out speed progress updates, just the found addresses (forced if not TTY)
-  --scan string
-    	Scan a specified source address (only useful for searching contract addresses)
-  -t, --timed seconds
-    	Allow to run for given number of seconds
+# Or add to PATH for convenience
+export PATH=$PATH:$GOPATH/bin
+vanieth 42
 ```
 
-#### Examples:
+## 📖 Overview
 
-```
-vanieth -n 3 'ABC'
-```
+Vanieth generates Ethereum vanity addresses with custom patterns. It leverages parallel processing to efficiently search for addresses matching your criteria, whether you're looking for simple prefixes, complex regex patterns, or specific contract addresses.
 
-Find 3 addresses that have `ABC` at the beginning.
+### Example Output
 
-```
-vanieth -t 5 'ABC'
-```
-
-Find as many address that have `ABC` at the beginning as possible within 5 seconds.
-
-
-```
-vanieth -c 'ABC'
+```json
+{
+  "address": "0x42f32B004Da1093d51AE40a58F38E33BA4f46397",
+  "private": "4774628228852ee570d188f92cd10df3282bb5d895fc701733f43fca6bfb9852",
+  "public": "04d811caac49ba458fda498e5bc385bc9cc6e67aa6b19ba754c6cd75953ef06310e8607798ce5810a0b32fbd41fe8915de52fd511e7660038ff7067a0e94fc9481"
+}
 ```
 
-Find any address that has `ABC` at the beginning of any of the first 10 contract addresses.
+> ⚠️ **Security Note**: The generation time increases exponentially with pattern length. A 4-character pattern takes significantly longer than a 2-character pattern.
 
+## 🛠️ Installation
+
+### Prerequisites
+
+- **Go**: Version 1.17 or higher (uses go-ethereum crypto libraries)
+- **Docker**: (Optional) For containerized execution
+
+### Build from Source
+
+```bash
+# Clone and enter the repository
+git clone https://github.com/makevoid/vanieth.git
+cd vanieth
+
+# Build the binary
+./build.sh
+
+# Run
+./vanieth abc
 ```
-vanieth -cd1 '00+AB'
-```
-
-Find any address that has `AB` after 2 or more `0` chars in the first contract address.
-
-```
-vanieth '.*ABC'
-```
-
-Find a single address that contains `ABC` anywhere.
-
-```
-vanieth '.*DEF$'
-```
-
-Find a single address that contains `DEF` at the end.
-
-```
-vanieth -i 'A.*A$'
-```
-
-Find a single address that contains either `A` or `a` at both the start and end.
-
-```
-vanieth -ld1 '.*ABC'
-```
-
-Find a single address that contains `ABC` anywhere, and also list the first contract address.
-
-```
-vanieth -ld5 --key=0x349fbc254ff918305ae51967acc1e17cfbd1b7c7e84ef8fa670b26f3be6146ba
-```
-
-List the details and first five contract address for the supplied private key.
-
-```
-vanieth -l --scan=0x950024ae4d9934c65c9fd04249e0f383910d27f2
-```
-
-Show the first 10 contract addresses of the supplied address.
-
-### Go Build
-
-`go get` the project following the instructions at the top
-
-cd into your $GOROOT where this project is located
-
-Build the executable with
-
-    ./build.sh
 
 ### Docker Build
 
-Now that you have built the executable you can package it up as a docker container via docker-compose
+```bash
+# Build the container
+docker-compose build
 
-Just run:
+# Test run
+docker-compose run vanieth ./vanieth abc
+```
 
-    docker-compose build
+## 💡 Usage
 
-this will build the docker container with your changes.
+### Basic Syntax
 
-Test run via:
+```
+vanieth [-acilqs] [-n num] [-d dist] (-key=key | -scan=address | search)
+```
 
-    docker-compose run vanieth ./vanieth abc
+### Options
+
+| Flag | Long Form | Description |
+|------|-----------|-------------|
+| `-a` | `--address` | Search in the main address (combine with `-c` to search both) |
+| `-c` | `--contract` | Search through contract addresses |
+| `-n` | `--count` | Number of results to find before stopping |
+| `-d` | `--distance` | Depth of contract addresses to search |
+| `-i` | `--ignore-case` | Case-insensitive search |
+| `-l` | `--list` | List all contract addresses within distance |
+| `-s` | `--no-sum` | Skip checksum address conversion |
+| `-q` | `--quiet` | Suppress progress updates |
+| `-t` | `--timed` | Run for specified number of seconds |
+| | `--key` | Display details for a specific private key |
+| | `--scan` | Scan a specified source address |
+| | `--max-procs` | Set number of parallel processes (default: CPU count) |
+
+## 📚 Examples
+
+### Find Simple Patterns
+
+```bash
+# Find address starting with "ABC"
+vanieth 'ABC'
+
+# Find 3 addresses with "ABC" prefix
+vanieth -n 3 'ABC'
+
+# Search for 5 seconds
+vanieth -t 5 'ABC'
+```
+
+### Regular Expression Patterns
+
+```bash
+# Address containing "ABC" anywhere
+vanieth '.*ABC'
+
+# Address ending with "DEF"
+vanieth '.*DEF$'
+
+# Case-insensitive: starts and ends with 'A'
+vanieth -i 'A.*A$'
+
+# Address with "AB" after 2+ zeros
+vanieth '00+AB'
+```
+
+### Contract Address Search
+
+```bash
+# Search in first 10 contract addresses
+vanieth -c 'ABC'
+
+# Search in first contract address only
+vanieth -cd1 '00+AB'
+
+# List first 5 contract addresses
+vanieth -ld5 --key=0x349fbc254ff918305ae51967acc1e17cfbd1b7c7e84ef8fa670b26f3be6146ba
+```
+
+### Address Analysis
+
+```bash
+# Show contract addresses for existing address
+vanieth -l --scan=0x950024ae4d9934c65c9fd04249e0f383910d27f2
+```
+
+## ⚡ Performance Tips
+
+1. **Pattern Length**: Each additional character exponentially increases search time
+2. **Parallel Processing**: Use `--max-procs` to optimize for your CPU
+3. **Regex Complexity**: Simple prefixes are faster than complex regex patterns
+4. **Contract Search**: Limiting distance (`-d`) improves performance
+
+## 🔒 Security Considerations
+
+- **Private Keys**: Never share or expose generated private keys
+- **Randomness**: Uses cryptographically secure random generation
+- **Verification**: Always verify addresses on a testnet first
+- **Storage**: Store private keys securely and encrypted
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Authors
+
+- [@makevoid](https://twitter.com/makevoid)
+- @norganna
+
+## 🙏 Acknowledgments
+
+- Built with Go using [go-ethereum](https://github.com/ethereum/go-ethereum) crypto libraries
+- Inspired by the Ethereum community's need for memorable addresses
+- Thanks to all contributors and users
 
 ---
 
+**⭐ Star this repository if you find it useful!**
 
-Enjoy,
+**🐛 Found a bug?** [Open an issue](https://github.com/makevoid/vanieth/issues)
 
-[@makevoid](https://twitter.com/makevoid) & @norganna
+**💬 Questions?** [Start a discussion](https://github.com/makevoid/vanieth/discussions)
