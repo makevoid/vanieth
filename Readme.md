@@ -5,7 +5,7 @@
 </div>
 
 > ⚡ An Ethereum vanity address generator written in Go many years ago by [@makevoid](https://twitter.com/makevoid) with @norganna contributing to it.
-> The project was originally aimed to be didactical and easy to read and it's only `~400` lines of Go.
+> The project was originally aimed to be didactical and easy to read. With only ~400 lines of Go, the codebase is well-suited for this use case.
 
 
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.17-blue.svg)](https://golang.org/)
