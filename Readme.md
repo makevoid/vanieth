@@ -1,8 +1,10 @@
 # Vanieth
 
-![Vanieth Banner](https://github.com/makevoid/vanieth/blob/master/screenshots/readme_banner.png?raw=true)
+<img width="653" height="653" alt="vanieth gopher" src="https://github.com/user-attachments/assets/2501fd0b-4196-4f74-86fe-6f908498a5fe" />
 
-> ⚡ A high-performance Ethereum vanity address generator written in Go
+> ⚡ An Ethereum vanity address generator written in Go many years ago by [@makevoid](https://twitter.com/makevoid) with @norganna contributing to it.
+> The project was originally aimed to be didactical and easy to read and it's only `420` lines of Go.
+
 
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.17-blue.svg)](https://golang.org/)
 [![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)](https://hub.docker.com/r/makevoid/vanieth)
@@ -196,8 +198,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
+**NOTES:** Original Logo of the project: https://github.com/makevoid/vanieth/blob/master/screenshots/readme_banner.png
+
+---
+
 **⭐ Star this repository if you find it useful!**
 
 **🐛 Found a bug?** [Open an issue](https://github.com/makevoid/vanieth/issues)
+
+
 
 **💬 Questions?** [Start a discussion](https://github.com/makevoid/vanieth/discussions)
