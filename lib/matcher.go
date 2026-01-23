@@ -2,7 +2,9 @@ package lib
 
 import (
 	"context"
+	"errors"
 	"regexp"
+	"strings"
 
 	"fmt"
 	"os"
@@ -11,6 +13,69 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 )
+
+// Common regex metacharacters in Go's regexp
+const regexMetaChars = `\.+*?[](){}|^$`
+
+// ValidHexPattern matches valid hexadecimal strings
+var validHexPattern = regexp.MustCompile(`^[0-9a-fA-F]+$`)
+
+// ErrInvalidCharacter is returned when the input contains invalid characters
+var ErrInvalidCharacter = errors.New("contains invalid characters for an Ethereum address")
+
+// ParseResult holds the result of parsing a match argument
+type ParseResult struct {
+	IsPrefix bool
+	Prefix   string
+	Regex    *regexp.Regexp
+}
+
+// ParseMatchArg parses and validates a match argument.
+// It returns a ParseResult indicating whether to use prefix matching or regex,
+// or an error if the input is invalid.
+func ParseMatchArg(matchArg string, ignoreCase bool) (*ParseResult, error) {
+	// Strip off the 0x prefix if present
+	matchArg = strings.TrimPrefix(matchArg, "0x")
+
+	if matchArg == "" {
+		return nil, errors.New("empty search pattern")
+	}
+
+	if ignoreCase {
+		matchArg = strings.ToLower(matchArg)
+	}
+
+	// Check if it's a plain hex string (optimal prefix matching)
+	if validHexPattern.MatchString(matchArg) {
+		return &ParseResult{
+			IsPrefix: true,
+			Prefix:   "0x" + matchArg,
+		}, nil
+	}
+
+	// Check if it contains regex metacharacters
+	if strings.ContainsAny(matchArg, regexMetaChars) {
+		// Validate that the regex compiles
+		regex, err := regexp.Compile("^0x" + matchArg)
+		if err != nil {
+			return nil, fmt.Errorf("invalid regex pattern: %w", err)
+		}
+		return &ParseResult{
+			IsPrefix: false,
+			Regex:    regex,
+		}, nil
+	}
+
+	// Not valid hex and not a regex - contains invalid characters
+	// Find the first invalid character for a helpful error message
+	for _, c := range matchArg {
+		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+			return nil, fmt.Errorf("invalid character '%c' - Ethereum addresses only contain hex characters (0-9, a-f)", c)
+		}
+	}
+
+	return nil, ErrInvalidCharacter
+}
 
 var currentSearches, lastSearches int64
 

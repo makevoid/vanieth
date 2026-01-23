@@ -10,9 +10,6 @@ import (
 
 	"golang.org/x/crypto/ssh/terminal"
 
-	"regexp"
-	"strings"
-
 	"github.com/makevoid/vanieth/lib"
 	"github.com/ogier/pflag"
 )
@@ -82,20 +79,15 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	} else if len(args) > 0 {
-		matchArg := args[0]
-
-		// Strip off the 0x
-		matchArg = strings.TrimPrefix(matchArg, "0x")
-
-		if matcher.IgnoreCase {
-			matchArg = strings.ToLower(matchArg)
+		result, err := lib.ParseMatchArg(args[0], matcher.IgnoreCase)
+		if err != nil {
+			fmt.Printf("Error: %s\n", err)
+			os.Exit(1)
 		}
-
-		if isPlain, _ := regexp.MatchString(`^[0-9a-fA-F]$`, matchArg); isPlain {
-			// This is a plain prefix matchArg, we don't need a regular expression
-			matcher.Prefix = "0x" + matchArg
+		if result.IsPrefix {
+			matcher.Prefix = result.Prefix
 		} else {
-			matcher.Regex = regexp.MustCompile("^0x" + matchArg)
+			matcher.Regex = result.Regex
 		}
 	}
 
