@@ -19,7 +19,8 @@
 ### Using Docker (Recommended)
 
 ```bash
-docker run makevoid/vanieth ./vanieth abc
+docker compose build
+docker compose run vanieth abc
 ```
 
 ### Using Go
@@ -77,10 +78,10 @@ cd vanieth
 
 ```bash
 # Build the container
-docker-compose build
+docker compose build
 
 # Test run
-docker-compose run vanieth ./vanieth abc
+docker compose run vanieth abc
 ```
 
 ## 💡 Usage

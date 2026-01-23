@@ -1,10 +1,15 @@
-FROM debian:latest
-
-RUN apt update -y
-RUN apt install -y libc6-dev
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-COPY vanieth ./
+COPY go.mod go.sum ./
+RUN go mod download
 
-CMD ./vanieth
+COPY . .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o vanieth .
+
+FROM scratch
+
+COPY --from=builder /app/vanieth /vanieth
+
+ENTRYPOINT ["/vanieth"]
